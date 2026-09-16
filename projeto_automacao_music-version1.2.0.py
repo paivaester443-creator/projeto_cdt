@@ -1,16 +1,15 @@
 import os
 import requests
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+import webbrowser
+from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
 
-# Carrega credenciais do .env
 load_dotenv(override=True)
 
 WEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
 SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
-SPOTIPY_REDIRECT_URI = os.getenv("SPOTIPY_REDIRECT_URI")
 CITY_NAME = "Sao Paulo"
 
 
@@ -25,21 +24,6 @@ def obter_clima():
     except Exception:
         pass
     return "Ensolarado"
-
-
-def inicializar_spotify():
-    scope = "user-modify-playback-state user-read-playback-state playlist-modify-public playlist-modify-private"
-    try:
-        auth = SpotifyOAuth(
-            client_id=SPOTIPY_CLIENT_ID,
-            client_secret=SPOTIPY_CLIENT_SECRET,
-            redirect_uri=SPOTIPY_REDIRECT_URI,
-            scope=scope
-        )
-        return spotipy.Spotify(auth_manager=auth)
-    except Exception as e:
-        print(f"Erro ao autenticar com o Spotify: {e}")
-        return None
 
 
 def main():
@@ -67,29 +51,30 @@ def main():
 
     print(f"\n🔍 Buscando playlist para: '{termo}'...")
 
-    sp = inicializar_spotify()
-    if not sp:
-        return
-
     try:
+        # Autenticação direta e simplificada (sem necessidade de OAuth/Redirect URI)
+        auth_manager = SpotifyClientCredentials(
+            client_id=SPOTIPY_CLIENT_ID,
+            client_secret=SPOTIPY_CLIENT_SECRET
+        )
+        sp = spotipy.Spotify(auth_manager=auth_manager)
+
         resultados = sp.search(q=termo, type="playlist", limit=1)
         items = resultados.get("playlists", {}).get("items", [])
 
         if items:
             playlist = items[0]
+            playlist_url = playlist["external_urls"]["spotify"]
+            
             print(f"\n🎵 Playlist Encontrada: {playlist['name']}")
-            print(f"🔗 Link: {playlist['external_urls']['spotify']}")
-
-            devices = sp.devices()
-            if devices.get("devices"):
-                sp.start_playback(context_uri=playlist["uri"])
-                print("▶ Reprodução iniciada no seu dispositivo Spotify!")
-            else:
-                print("⚠️ Abra o app do Spotify em seu computador ou celular para reproduzir.")
+            print("🚀 Redirecionando para o Spotify...")
+            
+            # Abre o link diretamente no navegador ou no app do Spotify
+            webbrowser.open(playlist_url)
         else:
             print("\n❌ Nenhuma playlist encontrada para estes parâmetros.")
     except Exception as e:
-        print(f"\nErro ao processar playlist: {e}")
+        print(f"\nErro ao buscar no Spotify: {e}")
 
 
 if __name__ == "__main__":
