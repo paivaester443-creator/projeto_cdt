@@ -1,6 +1,3 @@
-# projeto_cdt
-Repositório dedicado ao estudo e prática de Metodologias Ágeis. Este espaço visa compartilhar conhecimento sobre os frameworks mais populares (Scrum, Kanban, etc.), princípios de desenvolvimento ágil e ferramentas que promovem flexibilidade e eficiência. Sinta-se à vontade para explorar, aprender e contribuir!
-
 # Sintonia
 
 O **Sintonia** é uma aplicação web desenvolvida em **Python** com **Flask**, criada para gerar playlists personalizadas no Spotify a partir do momento do usuário.

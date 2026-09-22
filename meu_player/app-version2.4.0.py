@@ -1,20 +1,26 @@
 import os
+import json
 import sqlite3
 import unicodedata
+
 import requests
-
-from flask import Flask, redirect, request, render_template, session, url_for
-from werkzeug.security import generate_password_hash, check_password_hash
-
 import spotipy
+
+from flask import (
+    Flask,
+    redirect,
+    request,
+    render_template,
+    session,
+    url_for,
+    send_file
+)
+
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash, check_password_hash
 
-# ============================================================
-# CARREGAR VARIÁVEIS DO .ENV
-# ============================================================
-
-load_dotenv()
+from database import conectar, criar_tabelas
 
 
 # ============================================================
@@ -45,80 +51,9 @@ SCOPE = (
 
 WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 
-ROOT_USER = "root"
-ROOT_PASSWORD = "root"
-
-@app.route("/root", methods=["GET", "POST"])
-def root_login():
-
-    if session.get("root_authenticated"):
-        return redirect(url_for("home"))
-
-    erro = None
-
-    if request.method == "POST":
-
-        usuario = request.form.get("usuario", "")
-        senha = request.form.get("senha", "")
-
-        if usuario == ROOT_USER and senha == ROOT_PASSWORD:
-
-            session["root_authenticated"] = True
-
-            return redirect(url_for("home"))
-
-        erro = "Usuário ou senha incorretos."
-
-    return render_template(
-        "root_login.html",
-        erro=erro
-    )
-
-@app.before_request
-def verificar_root():
-
-    rotas_liberadas = [
-        "root_login",
-        "static"
-    ]
-
-    if request.endpoint in rotas_liberadas:
-        return
-
-    if not session.get("root_authenticated"):
-        return redirect(url_for("root_login"))
-
-app.secret_key = os.getenv(
-    "FLASK_SECRET_KEY",
-    "chave-secreta-temporaria"
-)
-
 
 # ============================================================
-# CREDENCIAIS DO SPOTIFY
-# ============================================================
-
-SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
-SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
-
-SPOTIPY_REDIRECT_URI = "http://127.0.0.1:8888/callback"
-
-SCOPE = (
-    "playlist-modify-public "
-    "playlist-modify-private "
-    "user-read-private"
-)
-
-
-# ============================================================
-# OPENWEATHER
-# ============================================================
-
-WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
-
-
-# ============================================================
-# FUNÇÃO PARA REMOVER ACENTOS
+# FUNÇÕES AUXILIARES
 # ============================================================
 
 def remover_acentos(texto):
@@ -127,17 +62,13 @@ def remover_acentos(texto):
         return ""
 
     return "".join(
-        c
-        for c in unicodedata.normalize("NFD", texto)
-        if unicodedata.category(c) != "Mn"
+        caractere
+        for caractere in unicodedata.normalize("NFD", texto)
+        if unicodedata.category(caractere) != "Mn"
     )
 
 
-# ============================================================
-# OBTER CLIMA
-# ============================================================
-
-def obter_clima(cidade="Sao Paulo"):
+def obter_clima(cidade):
 
     url = "https://api.openweathermap.org/data/2.5/weather"
 
@@ -187,7 +118,6 @@ def obter_clima(cidade="Sao Paulo"):
 
         print("Erro ao obter clima:", erro)
 
-    # Caso a API do clima falhe
     return {
         "temp": 22.0,
         "tag": "Ensolarado",
@@ -196,28 +126,19 @@ def obter_clima(cidade="Sao Paulo"):
 
 
 # ============================================================
-# AUTENTICAÇÃO DO SPOTIFY
+# SPOTIFY
 # ============================================================
 
 def criar_autenticador_spotify():
 
     return SpotifyOAuth(
-
         client_id=SPOTIPY_CLIENT_ID,
-
         client_secret=SPOTIPY_CLIENT_SECRET,
-
         redirect_uri=SPOTIPY_REDIRECT_URI,
-
         scope=SCOPE,
-
         show_dialog=True
     )
 
-
-# ============================================================
-# OBTER CLIENTE DO SPOTIFY
-# ============================================================
 
 def obter_spotify_cliente():
 
@@ -232,13 +153,11 @@ def obter_spotify_cliente():
 
         if sp_oauth.is_token_expired(token_info):
 
-            refresh_token = token_info.get(
-                "refresh_token"
-            )
+            refresh_token = token_info.get("refresh_token")
 
             if not refresh_token:
 
-                session.clear()
+                session.pop("token_info", None)
 
                 return None
 
@@ -254,33 +173,160 @@ def obter_spotify_cliente():
 
     except Exception as erro:
 
-        print(
-            "Erro ao obter cliente Spotify:",
-            erro
-        )
+        print("Erro ao obter cliente Spotify:", erro)
 
-        session.clear()
+        session.pop("token_info", None)
 
         return None
 
 
 # ============================================================
-# PÁGINA INICIAL
+# LOGIN DO SINTONIA
 # ============================================================
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def home():
 
-    sp = obter_spotify_cliente()
-
-    if sp:
+    if session.get("usuario"):
 
         return redirect(
-            url_for("dashboard")
+            url_for("spotify_login")
+        )
+
+    erro = None
+
+    if request.method == "POST":
+
+        usuario = request.form.get(
+            "usuario",
+            ""
+        ).strip()
+
+        senha = request.form.get(
+            "senha",
+            ""
+        )
+
+        conexao = conectar()
+
+        conta = conexao.execute(
+            """
+            SELECT *
+            FROM usuarios
+            WHERE usuario = ?
+            """,
+            (usuario,)
+        ).fetchone()
+
+        conexao.close()
+
+        if conta and check_password_hash(
+            conta["senha"],
+            senha
+        ):
+
+            session["usuario"] = conta["usuario"]
+
+            return redirect(
+                url_for("spotify_login")
+            )
+
+        erro = "Usuário ou senha incorretos."
+
+    return render_template(
+        "login.html",
+        erro=erro
+    )
+
+
+# ============================================================
+# CADASTRO
+# ============================================================
+
+@app.route("/cadastrar", methods=["GET", "POST"])
+def cadastrar():
+
+    erro = None
+
+    if request.method == "POST":
+
+        usuario = request.form.get(
+            "usuario",
+            ""
+        ).strip()
+
+        senha = request.form.get(
+            "senha",
+            ""
+        )
+
+        if not usuario or not senha:
+
+            erro = "Preencha todos os campos."
+
+            return render_template(
+                "cadastro.html",
+                erro=erro
+            )
+
+        if usuario.lower() == "root":
+
+            erro = "Esse usuário não está disponível."
+
+            return render_template(
+                "cadastro.html",
+                erro=erro
+            )
+
+        conexao = conectar()
+
+        existente = conexao.execute(
+            """
+            SELECT id
+            FROM usuarios
+            WHERE usuario = ?
+            """,
+            (usuario,)
+        ).fetchone()
+
+        if existente:
+
+            conexao.close()
+
+            erro = "Esse usuário já existe."
+
+            return render_template(
+                "cadastro.html",
+                erro=erro
+            )
+
+        senha_hash = generate_password_hash(
+            senha
+        )
+
+        conexao.execute(
+            """
+            INSERT INTO usuarios (usuario, senha)
+            VALUES (?, ?)
+            """,
+            (
+                usuario,
+                senha_hash
+            )
+        )
+
+        conexao.commit()
+        conexao.close()
+
+        session["usuario"] = usuario
+
+        return redirect(
+            url_for("spotify_login")
         )
 
     return render_template(
-        "login.html"
+        "cadastro.html",
+        erro=erro
     )
 
 
@@ -288,8 +334,14 @@ def home():
 # LOGIN DO SPOTIFY
 # ============================================================
 
-@app.route("/login")
-def login():
+@app.route("/spotify-login")
+def spotify_login():
+
+    if not session.get("usuario"):
+
+        return redirect(
+            url_for("home")
+        )
 
     sp_oauth = criar_autenticador_spotify()
 
@@ -305,27 +357,33 @@ def login():
 @app.route("/callback")
 def callback():
 
+    if not session.get("usuario"):
+
+        return redirect(
+            url_for("home")
+        )
+
     sp_oauth = criar_autenticador_spotify()
 
-    # Verifica se o Spotify retornou algum erro
     if request.args.get("error"):
 
         erro = request.args.get("error")
 
-        return (
-            f"<h2>Erro na autenticação</h2>"
-            f"<p>{erro}</p>"
-        )
+        return f"""
+        <h2>Erro na autenticação</h2>
+        <p>{erro}</p>
+        """
 
-    # Obtém o código de autorização
     code = request.args.get("code")
 
     if not code:
 
-        return (
-            "<h2>Erro</h2>"
-            "<p>Código de autorização não recebido.</p>"
-        )
+        return """
+        <h2>Erro</h2>
+        <p>
+            Código de autorização não recebido.
+        </p>
+        """
 
     try:
 
@@ -346,10 +404,10 @@ def callback():
             erro
         )
 
-        return (
-            "<h2>Erro ao conectar ao Spotify</h2>"
-            f"<p>{erro}</p>"
-        )
+        return f"""
+        <h2>Erro ao conectar ao Spotify</h2>
+        <p>{erro}</p>
+        """
 
 
 # ============================================================
@@ -359,37 +417,23 @@ def callback():
 @app.route("/dashboard")
 def dashboard():
 
-    sp = obter_spotify_cliente()
-
-    if not sp:
+    if not session.get("usuario"):
 
         return redirect(
             url_for("home")
         )
 
-    try:
+    sp = obter_spotify_cliente()
 
-        usuario = sp.current_user()
+    if not sp:
 
-        nome_usuario = usuario.get(
-            "display_name",
-            "Usuário"
+        return redirect(
+            url_for("spotify_login")
         )
-
-    except Exception as erro:
-
-        print(
-            "Erro ao obter usuário:",
-            erro
-        )
-
-        nome_usuario = "Usuário"
 
     return render_template(
-
         "dashboard.html",
-
-        nome_usuario=nome_usuario
+        usuario=session.get("usuario")
     )
 
 
@@ -400,21 +444,23 @@ def dashboard():
 @app.route("/gerar", methods=["POST"])
 def gerar():
 
-    sp = obter_spotify_cliente()
-
-    if not sp:
+    if not session.get("usuario"):
 
         return redirect(
             url_for("home")
         )
 
-    # --------------------------------------------------------
-    # DADOS DO FORMULÁRIO
-    # --------------------------------------------------------
+    sp = obter_spotify_cliente()
+
+    if not sp:
+
+        return redirect(
+            url_for("spotify_login")
+        )
 
     cidade = request.form.get(
         "cidade",
-        "Sao Paulo"
+        ""
     ).strip()
 
     artista = request.form.get(
@@ -427,9 +473,14 @@ def gerar():
         "Feliz"
     )
 
-    # --------------------------------------------------------
-    # CLIMA
-    # --------------------------------------------------------
+    if not cidade:
+
+        return """
+        <h2>Informe uma cidade.</h2>
+        <a href="/dashboard">
+            Voltar
+        </a>
+        """
 
     clima = obter_clima(cidade)
 
@@ -440,10 +491,6 @@ def gerar():
     clima_limpo = remover_acentos(
         clima["tag"]
     )
-
-    # --------------------------------------------------------
-    # TERMO DE BUSCA
-    # --------------------------------------------------------
 
     if artista:
 
@@ -463,6 +510,7 @@ def gerar():
     print("===================================")
     print("BUSCA DE MÚSICAS")
     print("===================================")
+    print("Usuário:", session.get("usuario"))
     print("Cidade:", cidade)
     print("Humor:", humor)
     print("Clima:", clima["tag"])
@@ -472,28 +520,17 @@ def gerar():
 
     tracks_uris = []
 
-    # --------------------------------------------------------
-    # PRIMEIRA BUSCA
-    # --------------------------------------------------------
-
     try:
 
         resultados = sp.search(
-
             q=termo_busca,
-
             type="track",
-
             limit=10
         )
 
         tracks_uris = [
-
             item["uri"]
-
-            for item
-            in resultados["tracks"]["items"]
-
+            for item in resultados["tracks"]["items"]
         ]
 
         print(
@@ -508,30 +545,19 @@ def gerar():
             erro
         )
 
-    # --------------------------------------------------------
-    # SEGUNDA BUSCA
-    # --------------------------------------------------------
-
     if not tracks_uris:
 
         try:
 
             resultados = sp.search(
-
                 q=humor_limpo,
-
                 type="track",
-
                 limit=10
             )
 
             tracks_uris = [
-
                 item["uri"]
-
-                for item
-                in resultados["tracks"]["items"]
-
+                for item in resultados["tracks"]["items"]
             ]
 
             print(
@@ -546,12 +572,9 @@ def gerar():
                 erro
             )
 
-    # --------------------------------------------------------
-    # NOME DA PLAYLIST
-    # --------------------------------------------------------
-
     nome_playlist = (
-        f"Sintonia | {humor} | {clima['tag']}"
+        f"Sintonia | {humor} | "
+        f"{clima['tag']}"
     )
 
     if artista:
@@ -560,18 +583,11 @@ def gerar():
             f" | {artista}"
         )
 
-    # --------------------------------------------------------
-    # CRIAR PLAYLIST
-    # --------------------------------------------------------
-
     try:
 
         playlist = sp.current_user_playlist_create(
-
             name=nome_playlist,
-
             public=True,
-
             description=(
                 f"Playlist criada pelo Sintonia "
                 f"para {cidade}. "
@@ -591,23 +607,20 @@ def gerar():
             erro
         )
 
-        return (
-            "<h2>Não foi possível criar a playlist.</h2>"
-            f"<p>{erro}</p>"
-        )
+        return f"""
+        <h2>
+            Não foi possível criar a playlist.
+        </h2>
 
-    # --------------------------------------------------------
-    # ADICIONAR MÚSICAS
-    # --------------------------------------------------------
+        <p>{erro}</p>
+        """
 
     if tracks_uris:
 
         try:
 
             sp.playlist_add_items(
-
                 playlist_id=playlist["id"],
-
                 items=tracks_uris
             )
 
@@ -629,13 +642,9 @@ def gerar():
             "Nenhuma música foi encontrada."
         )
 
-    # --------------------------------------------------------
-    # ABRIR PLAYLIST
-    # --------------------------------------------------------
-
-    url_spotify = (
-        playlist["external_urls"]["spotify"]
-    )
+    url_spotify = playlist[
+        "external_urls"
+    ]["spotify"]
 
     return redirect(
         url_spotify
@@ -643,7 +652,7 @@ def gerar():
 
 
 # ============================================================
-# LOGOUT
+# LOGOUT DO USUÁRIO
 # ============================================================
 
 @app.route("/logout")
@@ -657,8 +666,160 @@ def logout():
 
 
 # ============================================================
-# EXECUTAR A APLICAÇÃO
+# ÁREA MASTER
 # ============================================================
+
+ROOT_USER = "root"
+ROOT_PASSWORD = "root"
+
+
+@app.route("/root", methods=["GET", "POST"])
+def root_login():
+
+    if session.get("root_authenticated"):
+
+        return redirect(
+            url_for("root_panel")
+        )
+
+    erro = None
+
+    if request.method == "POST":
+
+        usuario = request.form.get(
+            "usuario",
+            ""
+        )
+
+        senha = request.form.get(
+            "senha",
+            ""
+        )
+
+        if (
+            usuario == ROOT_USER
+            and senha == ROOT_PASSWORD
+        ):
+
+            session["root_authenticated"] = True
+
+            return redirect(
+                url_for("root_panel")
+            )
+
+        erro = "Usuário ou senha incorretos."
+
+    return render_template(
+        "root_login.html",
+        erro=erro
+    )
+
+
+@app.route("/root/painel")
+def root_panel():
+
+    if not session.get(
+        "root_authenticated"
+    ):
+
+        return redirect(
+            url_for("root_login")
+        )
+
+    return render_template(
+        "root_panel.html"
+    )
+
+
+@app.route("/root/exportar")
+def root_exportar():
+
+    if not session.get(
+        "root_authenticated"
+    ):
+
+        return redirect(
+            url_for("root_login")
+        )
+
+    nome_arquivo = "sintonia_database.json"
+
+    conexao = sqlite3.connect(
+        DATABASE
+    )
+
+    conexao.row_factory = sqlite3.Row
+
+    cursor = conexao.cursor()
+
+    cursor.execute("""
+        SELECT name
+        FROM sqlite_master
+        WHERE type = 'table'
+        AND name NOT LIKE 'sqlite_%'
+    """)
+
+    tabelas = cursor.fetchall()
+
+    banco = {}
+
+    for tabela in tabelas:
+
+        nome_tabela = tabela["name"]
+
+        cursor.execute(
+            f'SELECT * FROM "{nome_tabela}"'
+        )
+
+        registros = cursor.fetchall()
+
+        banco[nome_tabela] = [
+            dict(registro)
+            for registro in registros
+        ]
+
+    conexao.close()
+
+    with open(
+        nome_arquivo,
+        "w",
+        encoding="utf-8"
+    ) as arquivo:
+
+        json.dump(
+            banco,
+            arquivo,
+            ensure_ascii=False,
+            indent=4
+        )
+
+    return send_file(
+        nome_arquivo,
+        as_attachment=True,
+        download_name=nome_arquivo,
+        mimetype="application/json"
+    )
+
+
+@app.route("/root/logout")
+def root_logout():
+
+    session.pop(
+        "root_authenticated",
+        None
+    )
+
+    return redirect(
+        url_for("root_login")
+    )
+
+
+# ============================================================
+# INICIALIZAÇÃO
+# ============================================================
+
+criar_tabelas()
+
 
 if __name__ == "__main__":
 
@@ -667,7 +828,12 @@ if __name__ == "__main__":
     print("SINTONIA")
     print("===================================")
     print("Aplicação rodando em:")
-    print("http://127.0.0.1:8888/callback")
+    print("http://127.0.0.1:8888")
+    print()
+    print("Acesso Master:")
+    print("http://127.0.0.1:8888/root")
+    print("Usuário: root")
+    print("Senha: root")
     print("===================================")
     print()
 

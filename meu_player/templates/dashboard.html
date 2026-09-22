@@ -5,299 +5,247 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Sintonia</title>
 
     <style>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-
         :root {
 
-            --background: #fceef4;
-
+            --fundo: #fff0f6;
             --card: #ffffff;
+            --texto: #3d1f2f;
+            --campo: #ffffff;
+            --borda: #d98caf;
 
-            --input: #f8e2eb;
+            --botao: #a83f6f;
+            --botao-hover: #8d315c;
 
-            --primary: #b84d78;
-
-            --primary-hover: #a64069;
-
-            --text: #321d29;
-
-            --secondary: #765c68;
-
-            --shadow: rgba(80, 30, 55, 0.15);
         }
 
+        body.escuro {
 
-        /* MODO ESCURO */
+            --fundo: #24131d;
+            --card: #321923;
+            --texto: #f9dce9;
+            --campo: #29151f;
+            --borda: #71334f;
 
-        @media (prefers-color-scheme: dark) {
-
-            :root {
-
-                --background: #24151f;
-
-                --card: #321d2a;
-
-                --input: #432636;
-
-                --primary: #c45a83;
-
-                --primary-hover: #d36a92;
-
-                --text: #f8eaf0;
-
-                --secondary: #cdb8c2;
-
-                --shadow: rgba(0, 0, 0, 0.35);
-            }
+            --botao: #9e416b;
+            --botao-hover: #b94f7e;
         }
 
+        * {
+            box-sizing: border-box;
+        }
 
         body {
 
+            margin: 0;
+
             min-height: 100vh;
 
-            padding: 30px;
+            background: var(--fundo);
+            color: var(--texto);
 
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background: var(--background);
-
-            color: var(--text);
+            font-family: Arial, sans-serif;
 
             transition:
-                background 0.3s ease,
-                color 0.3s ease;
+                background 0.3s,
+                color 0.3s;
         }
 
+        header {
 
-        .container {
+            display: flex;
 
-            width: 100%;
+            justify-content: space-between;
+            align-items: center;
 
-            max-width: 650px;
-
-            margin: 50px auto;
-
-            padding: 42px;
+            padding: 20px 30px;
 
             background: var(--card);
 
-            border-radius: 24px;
+            border-bottom:
+                1px solid var(--borda);
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        .acoes {
+
+            display: flex;
+            gap: 10px;
+        }
+
+        .tema,
+        .sair {
+
+            padding: 9px 14px;
+
+            border: 1px solid var(--borda);
+            border-radius: 8px;
+
+            background: var(--card);
+            color: var(--texto);
+
+            text-decoration: none;
+
+            cursor: pointer;
+        }
+
+        .conteudo {
+
+            width: 600px;
+            max-width: 90%;
+
+            margin: 50px auto;
+        }
+
+        .card {
+
+            padding: 30px;
+
+            border-radius: 16px;
+
+            background: var(--card);
 
             box-shadow:
-                0 12px 35px var(--shadow);
+                0 10px 30px rgba(0,0,0,0.12);
         }
 
-
-        h1 {
-
-            margin-bottom: 10px;
-
-            text-align: center;
-
-            font-size: 38px;
+        h2 {
+            margin-top: 0;
         }
-
-
-        .welcome {
-
-            margin-bottom: 35px;
-
-            text-align: center;
-
-            color: var(--secondary);
-
-            line-height: 1.6;
-
-            font-size: 16px;
-        }
-
-
-        .form-group {
-
-            margin-bottom: 22px;
-        }
-
 
         label {
 
             display: block;
 
-            margin-bottom: 8px;
-
-            font-size: 15px;
+            margin-top: 18px;
+            margin-bottom: 7px;
 
             font-weight: bold;
         }
-
 
         input,
         select {
 
             width: 100%;
 
-            padding: 14px 15px;
+            padding: 13px;
 
-            border: none;
+            border: 1px solid var(--borda);
+            border-radius: 8px;
 
-            border-radius: 10px;
+            background: var(--campo);
+            color: var(--texto);
 
-            outline: none;
-
-            background: var(--input);
-
-            color: var(--text);
-
-            font-size: 16px;
-
-            transition:
-                box-shadow 0.2s ease;
+            font-size: 15px;
         }
 
+        .localizacao {
 
-        input::placeholder {
+            margin-top: 10px;
 
-            color: var(--secondary);
+            padding: 10px;
+
+            border: 1px solid var(--borda);
+            border-radius: 8px;
+
+            background: transparent;
+            color: var(--texto);
+
+            cursor: pointer;
         }
 
+        .localizacao:hover {
 
-        input:focus,
-        select:focus {
-
-            box-shadow:
-                0 0 0 2px var(--primary);
+            background: var(--botao);
+            color: white;
         }
 
-
-        .generate-button {
-
-            width: 100%;
-
-            padding: 16px;
+        .status {
 
             margin-top: 8px;
 
+            font-size: 14px;
+        }
+
+        .gerar {
+
+            width: 100%;
+
+            margin-top: 25px;
+
+            padding: 14px;
+
             border: none;
+            border-radius: 8px;
 
-            border-radius: 30px;
+            background: var(--botao);
+            color: white;
 
-            background: var(--primary);
-
-            color: #ffffff;
-
-            font-size: 17px;
-
-            font-weight: bold;
+            font-size: 16px;
 
             cursor: pointer;
-
-            transition:
-                background 0.3s ease,
-                transform 0.3s ease;
         }
 
-
-        .generate-button:hover {
-
-            background: var(--primary-hover);
-
-            transform: translateY(-2px);
-        }
-
-
-        .logout {
-
-            display: block;
-
-            width: fit-content;
-
-            margin: 25px auto 0;
-
-            color: var(--secondary);
-
-            text-decoration: none;
-
-            font-size: 14px;
-
-            transition:
-                color 0.2s ease;
-        }
-
-
-        .logout:hover {
-
-            color: var(--primary);
-        }
-
-
-        @media (max-width: 600px) {
-
-            body {
-                padding: 15px;
-            }
-
-            .container {
-
-                margin: 25px auto;
-
-                padding: 30px 22px;
-            }
-
-            h1 {
-                font-size: 32px;
-            }
+        .gerar:hover {
+            background: var(--botao-hover);
         }
 
     </style>
 
 </head>
 
-
 <body>
 
-    <main class="container">
+    <header>
 
         <h1>Sintonia</h1>
 
-        <p class="welcome">
+        <div class="acoes">
 
-            Olá!
+            <button
+                class="tema"
+                onclick="alternarTema()"
+                id="botaoTema">
+                Modo escuro
+            </button>
 
-            <br>
+            <a
+                class="sair"
+                href="{{ url_for('logout') }}">
+                Sair
+            </a>
 
-            Crie uma playlist baseada
-            no seu momento.
+        </div>
 
-        </p>
+    </header>
 
+    <main class="conteudo">
 
-        <form
-            action="{{ url_for('gerar') }}"
-            method="POST"
-        >
+        <div class="card">
 
-            <!-- CIDADE -->
+            <h2>
+                Olá, {{ usuario }}
+            </h2>
 
-            <div class="form-group">
+            <p>
+                Crie uma playlist de acordo com
+                seu momento.
+            </p>
 
-                <label for="cidade">
+            <form
+                method="POST"
+                action="{{ url_for('gerar') }}">
+
+                <label>
                     Cidade
                 </label>
 
@@ -305,26 +253,38 @@
                     type="text"
                     id="cidade"
                     name="cidade"
-                    placeholder="Ex: São Paulo"
-                    value="Sao Paulo"
-                    required
-                >
+                    placeholder="Digite uma cidade">
 
-            </div>
+                <button
+                    type="button"
+                    class="localizacao"
+                    onclick="usarLocalizacao()">
 
+                    Usar minha localização
 
-            <!-- HUMOR -->
+                </button>
 
-            <div class="form-group">
+                <div
+                    class="status"
+                    id="statusLocalizacao">
+                </div>
 
-                <label for="humor">
-                    Como você está se sentindo?
+                <input
+                    type="hidden"
+                    id="latitude"
+                    name="latitude">
+
+                <input
+                    type="hidden"
+                    id="longitude"
+                    name="longitude">
+
+                <label>
+                    Humor
                 </label>
 
                 <select
-                    id="humor"
-                    name="humor"
-                >
+                    name="humor">
 
                     <option value="Feliz">
                         Feliz
@@ -338,12 +298,12 @@
                         Calmo
                     </option>
 
-                    <option value="Animado">
-                        Animado
-                    </option>
-
                     <option value="Romântico">
                         Romântico
+                    </option>
+
+                    <option value="Animado">
+                        Animado
                     </option>
 
                     <option value="Melancólico">
@@ -356,47 +316,118 @@
 
                 </select>
 
-            </div>
-
-
-            <!-- ARTISTA -->
-
-            <div class="form-group">
-
-                <label for="artista">
+                <label>
                     Artista favorito
                 </label>
 
                 <input
                     type="text"
-                    id="artista"
                     name="artista"
-                    placeholder="Ex: ATEEZ"
-                >
+                    placeholder="Opcional">
 
-            </div>
+                <button
+                    class="gerar"
+                    type="submit">
 
+                    Criar playlist
 
-            <!-- BOTÃO -->
+                </button>
 
-            <button
-                type="submit"
-                class="generate-button"
-            >
-                Criar minha playlist
-            </button>
+            </form>
 
-        </form>
-
-
-        <a
-            href="{{ url_for('logout') }}"
-            class="logout"
-        >
-            Sair do Spotify
-        </a>
+        </div>
 
     </main>
+
+    <script>
+
+        function alternarTema() {
+
+            document.body.classList.toggle("escuro");
+
+            const escuro =
+                document.body.classList.contains("escuro");
+
+            localStorage.setItem(
+                "temaSintonia",
+                escuro ? "escuro" : "claro"
+            );
+
+            document.getElementById(
+                "botaoTema"
+            ).textContent =
+                escuro
+                    ? "Modo claro"
+                    : "Modo escuro";
+        }
+
+
+        if (
+            localStorage.getItem("temaSintonia")
+            === "escuro"
+        ) {
+
+            document.body.classList.add("escuro");
+
+            document.getElementById(
+                "botaoTema"
+            ).textContent = "Modo claro";
+        }
+
+
+        function usarLocalizacao() {
+
+            const status =
+                document.getElementById(
+                    "statusLocalizacao"
+                );
+
+            if (!navigator.geolocation) {
+
+                status.textContent =
+                    "Seu navegador não permite localização.";
+
+                return;
+            }
+
+            status.textContent =
+                "Obtendo sua localização...";
+
+            navigator.geolocation.getCurrentPosition(
+
+                function(posicao) {
+
+                    const latitude =
+                        posicao.coords.latitude;
+
+                    const longitude =
+                        posicao.coords.longitude;
+
+                    document.getElementById(
+                        "latitude"
+                    ).value = latitude;
+
+                    document.getElementById(
+                        "longitude"
+                    ).value = longitude;
+
+                    status.textContent =
+                        "Localização definida. O clima será obtido pelas coordenadas.";
+
+                },
+
+                function() {
+
+                    status.textContent =
+                        "Não foi possível obter sua localização. Digite a cidade manualmente.";
+
+                }
+
+            );
+
+        }
+
+    </script>
 
 </body>
 

@@ -1,132 +1,223 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Sintonia — Master</title>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Painel Root - Sintonia</title>
 
     <style>
+
+        :root {
+
+            --fundo: #fff0f6;
+            --card: #ffffff;
+            --texto: #3d1f2f;
+            --borda: #d98caf;
+            --botao: #a83f6f;
+            --botao-hover: #8d315c;
+        }
+
+        body.escuro {
+
+            --fundo: #24131d;
+            --card: #321923;
+            --texto: #f9dce9;
+            --borda: #71334f;
+            --botao: #9e416b;
+            --botao-hover: #b94f7e;
+        }
+
         * {
             box-sizing: border-box;
         }
 
         body {
+
             margin: 0;
+
             min-height: 100vh;
 
+            background: var(--fundo);
+            color: var(--texto);
+
             font-family: Arial, sans-serif;
-
-            background: #f7dce8;
-            color: #351d29;
         }
 
-        .container {
-            max-width: 900px;
-            margin: auto;
-            padding: 50px 25px;
+        .topo {
+
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 20px 30px;
+
+            background: var(--card);
+
+            border-bottom:
+                1px solid var(--borda);
         }
 
-        h1 {
-            margin-bottom: 5px;
+        .acoes {
+
+            display: flex;
+            gap: 10px;
         }
 
-        .subtitle {
-            opacity: 0.7;
-            margin-bottom: 35px;
-        }
+        button,
+        a {
 
-        .card {
-            background: #fff7fa;
-            padding: 30px;
-            border-radius: 18px;
-
-            box-shadow: 0 10px 30px rgba(80, 20, 50, 0.12);
-        }
-
-        .card h2 {
-            margin-top: 0;
-        }
-
-        .button {
-            display: inline-block;
-
-            padding: 13px 20px;
+            padding: 10px 15px;
 
             border-radius: 8px;
 
-            background: #b93668;
+            border: 1px solid var(--borda);
+
+            background: var(--card);
+            color: var(--texto);
+
+            text-decoration: none;
+
+            cursor: pointer;
+        }
+
+        .conteudo {
+
+            width: 600px;
+            max-width: 90%;
+
+            margin: 50px auto;
+        }
+
+        .card {
+
+            padding: 30px;
+
+            border-radius: 16px;
+
+            background: var(--card);
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.12);
+        }
+
+        .exportar {
+
+            display: inline-block;
+
+            margin-top: 20px;
+
+            background: var(--botao);
             color: white;
 
-            text-decoration: none;
-            font-weight: bold;
+            border: none;
         }
 
-        .button:hover {
-            background: #982b56;
+        .exportar:hover {
+
+            background: var(--botao-hover);
         }
 
-        .logout {
-            display: inline-block;
-            margin-top: 25px;
-
-            color: #8b3153;
-            text-decoration: none;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: #24151d;
-                color: #f8e9ef;
-            }
-
-            .card {
-                background: #321d28;
-            }
-
-            .logout {
-                color: #f0a9c4;
-            }
-        }
     </style>
+
 </head>
 
 <body>
 
-    <div class="container">
+    <header class="topo">
 
         <h1>Sintonia</h1>
 
-        <div class="subtitle">
-            Painel Master
-        </div>
+        <div class="acoes">
 
-        <div class="card">
+            <button
+                onclick="alternarTema()"
+                id="botaoTema">
 
-            <h2>Banco de dados</h2>
+                Modo escuro
 
-            <p>
-                Exporte uma cópia dos dados armazenados
-                no banco de dados do Sintonia.
-            </p>
+            </button>
 
             <a
-                href="{{ url_for('root_exportar') }}"
-                class="button"
-            >
-                Exportar banco de dados
+                href="{{ url_for('root_logout') }}">
+
+                Sair
+
             </a>
 
         </div>
 
-        <a
-            href="{{ url_for('root_logout') }}"
-            class="logout"
-        >
-            Sair
-        </a>
+    </header>
 
-    </div>
+    <main class="conteudo">
+
+        <div class="card">
+
+            <h2>Painel Root</h2>
+
+            <p>
+                Área administrativa do Sintonia.
+            </p>
+
+            <p>
+                Aqui é possível exportar os dados
+                armazenados no banco de dados.
+            </p>
+
+            <a
+                class="exportar"
+                href="{{ url_for('root_exportar') }}">
+
+                Exportar banco de dados
+
+            </a>
+
+        </div>
+
+    </main>
+
+    <script>
+
+        function alternarTema() {
+
+            document.body.classList.toggle("escuro");
+
+            const escuro =
+                document.body.classList.contains("escuro");
+
+            localStorage.setItem(
+                "temaSintonia",
+                escuro ? "escuro" : "claro"
+            );
+
+            document.getElementById(
+                "botaoTema"
+            ).textContent =
+                escuro
+                    ? "Modo claro"
+                    : "Modo escuro";
+        }
+
+
+        if (
+            localStorage.getItem("temaSintonia")
+            === "escuro"
+        ) {
+
+            document.body.classList.add("escuro");
+
+            document.getElementById(
+                "botaoTema"
+            ).textContent = "Modo claro";
+        }
+
+    </script>
 
 </body>
+
 </html>

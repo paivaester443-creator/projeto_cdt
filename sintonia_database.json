@@ -1,0 +1,61 @@
+{
+    "musicas": [
+        {
+            "id": 1,
+            "titulo": "Happy",
+            "artista": "Pharrell Williams",
+            "humor": "Feliz",
+            "clima": "Ensolarado",
+            "youtube_id": "ZbZSe6N_BXs"
+        },
+        {
+            "id": 2,
+            "titulo": "Sad Songs",
+            "artista": "Elton John",
+            "humor": "Triste",
+            "clima": "Chuvoso",
+            "youtube_id": "m2S9B9tE9d4"
+        },
+        {
+            "id": 3,
+            "titulo": "Sunroof",
+            "artista": "Nicky Youre",
+            "humor": "Energético",
+            "clima": "Ensolarado",
+            "youtube_id": "G5xS908lB28"
+        },
+        {
+            "id": 4,
+            "titulo": "Weightless",
+            "artista": "Marconi Union",
+            "humor": "Calmo",
+            "clima": "Nublado",
+            "youtube_id": "UfcAVejslrU"
+        },
+        {
+            "id": 5,
+            "titulo": "Perfect",
+            "artista": "Ed Sheeran",
+            "humor": "Romântico",
+            "clima": "Nublado",
+            "youtube_id": "2Vv-BfVoq4g"
+        },
+        {
+            "id": 6,
+            "titulo": "Sweater Weather",
+            "artista": "The Neighbourhood",
+            "humor": "Nostálgico",
+            "clima": "Chuvoso",
+            "youtube_id": "GC862mACcwU"
+        }
+    ],
+    "playlists": [],
+    "playlist_itens": [],
+    "usuarios": [
+        {
+            "id": 1,
+            "usuario": "root",
+            "senha": "scrypt:32768:8:1$Lrrr6iVsonYVIS2f$5e76aaff0cb6800a670647b486cde96d917dda6a8e4db36909f473d253d11c75fbad46d7e697d0ff58a20fab3b0cc07e107a44ffd91241ffc12b1c4ba4ca8e29"
+        }
+    ]
+}

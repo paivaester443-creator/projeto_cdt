@@ -8,7 +8,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Sintonia</title>
+    <title>Cadastro - Sintonia</title>
 
     <style>
 
@@ -50,16 +50,11 @@
             color: var(--texto);
 
             font-family: Arial, sans-serif;
-
-            transition:
-                background 0.3s,
-                color 0.3s;
         }
 
         .tema {
 
             position: fixed;
-
             top: 20px;
             right: 20px;
 
@@ -90,11 +85,6 @@
         }
 
         h1 {
-            margin-top: 0;
-            text-align: center;
-        }
-
-        p {
             text-align: center;
         }
 
@@ -102,7 +92,7 @@
 
             display: block;
 
-            margin-top: 18px;
+            margin-top: 15px;
             margin-bottom: 7px;
         }
 
@@ -117,8 +107,6 @@
 
             background: var(--campo);
             color: var(--texto);
-
-            font-size: 15px;
         }
 
         button {
@@ -135,25 +123,7 @@
             background: var(--botao);
             color: white;
 
-            font-size: 16px;
-
             cursor: pointer;
-        }
-
-        button:hover {
-            background: var(--botao-hover);
-        }
-
-        .cadastro {
-
-            display: block;
-
-            margin-top: 18px;
-
-            text-align: center;
-
-            color: var(--botao);
-            text-decoration: none;
         }
 
         .erro {
@@ -168,6 +138,17 @@
             color: white;
 
             text-align: center;
+        }
+
+        a {
+
+            display: block;
+
+            margin-top: 18px;
+
+            text-align: center;
+
+            color: var(--botao);
         }
 
     </style>
@@ -185,9 +166,7 @@
 
     <div class="caixa">
 
-        <h1>Sintonia</h1>
-
-        <p>Entre na sua conta</p>
+        <h1>Criar conta</h1>
 
         {% if erro %}
 
@@ -199,7 +178,7 @@
 
         <form
             method="POST"
-            action="{{ url_for('entrar') }}">
+            action="{{ url_for('cadastro') }}">
 
             <label>Usuário</label>
 
@@ -215,16 +194,21 @@
                 name="senha"
                 required>
 
+            <label>Confirmar senha</label>
+
+            <input
+                type="password"
+                name="confirmar_senha"
+                required>
+
             <button type="submit">
-                Entrar
+                Criar conta
             </button>
 
         </form>
 
-        <a
-            class="cadastro"
-            href="{{ url_for('cadastro') }}">
-            Ainda não tenho uma conta
+        <a href="{{ url_for('inicio') }}">
+            Já tenho uma conta
         </a>
 
     </div>
@@ -251,10 +235,10 @@
                     : "Modo escuro";
         }
 
-        const tema =
-            localStorage.getItem("temaSintonia");
-
-        if (tema === "escuro") {
+        if (
+            localStorage.getItem("temaSintonia")
+            === "escuro"
+        ) {
 
             document.body.classList.add("escuro");
 
