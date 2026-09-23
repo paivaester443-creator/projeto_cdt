@@ -17,11 +17,30 @@ Cadastro | Sintonia
         Cadastre sua conta para usar o Sintonia.
     </p>
 
+    {% if erro %}
+    <p class="error-message">
+        {{ erro }}
+    </p>
+    {% endif %}
+
 
     <form
         method="POST"
         class="form"
     >
+
+        <label for="nome">
+            Nome
+        </label>
+
+        <input
+            id="nome"
+            name="nome"
+            type="text"
+            autocomplete="name"
+            required
+        >
+
 
         <label for="usuario">
             Usuário
@@ -49,13 +68,13 @@ Cadastro | Sintonia
         >
 
 
-        <label for="confirmar">
+        <label for="confirmar_senha">
             Confirmar senha
         </label>
 
         <input
-            id="confirmar"
-            name="confirmar"
+            id="confirmar_senha"
+            name="confirmar_senha"
             type="password"
             autocomplete="new-password"
             required

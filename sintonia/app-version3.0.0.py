@@ -3,7 +3,6 @@ import json
 import sqlite3
 import secrets
 import unicodedata
-from datetime import datetime
 from difflib import SequenceMatcher
 
 import requests
@@ -91,8 +90,10 @@ def verificar_configuracoes():
 # ============================================================
 
 def conectar_banco():
+
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
+
     return conn
 
 
@@ -119,29 +120,53 @@ def criar_banco():
     # --------------------------------------------------------
 
     cursor.execute("PRAGMA table_info(usuarios)")
-    colunas = [linha["name"] for linha in cursor.fetchall()]
+
+    colunas = [
+        linha["name"]
+        for linha in cursor.fetchall()
+    ]
+
+    # CORREÇÃO PRINCIPAL:
+    # adiciona a coluna nome caso o banco antigo não tenha
+    if "nome" not in colunas:
+
+        try:
+            cursor.execute(
+                "ALTER TABLE usuarios ADD COLUMN nome TEXT"
+            )
+
+            print("Coluna 'nome' adicionada ao banco.")
+
+        except sqlite3.OperationalError:
+            pass
 
     if "usuario" not in colunas:
+
         try:
             cursor.execute(
                 "ALTER TABLE usuarios ADD COLUMN usuario TEXT"
             )
+
         except sqlite3.OperationalError:
             pass
 
     if "senha" not in colunas:
+
         try:
             cursor.execute(
                 "ALTER TABLE usuarios ADD COLUMN senha TEXT"
             )
+
         except sqlite3.OperationalError:
             pass
 
     if "spotify_id" not in colunas:
+
         try:
             cursor.execute(
                 "ALTER TABLE usuarios ADD COLUMN spotify_id TEXT"
             )
+
         except sqlite3.OperationalError:
             pass
 
@@ -234,6 +259,7 @@ def obter_spotify():
     if oauth.is_token_expired(token_info):
 
         try:
+
             token_info = oauth.refresh_access_token(
                 token_info["refresh_token"]
             )
@@ -241,7 +267,9 @@ def obter_spotify():
             session["token_info"] = token_info
 
         except Exception:
+
             session.pop("token_info", None)
+
             return None
 
     return spotipy.Spotify(
@@ -257,9 +285,14 @@ def obter_spotify():
 def index():
 
     if session.get("usuario_id"):
-        return redirect(url_for("dashboard"))
 
-    return render_template("login.html")
+        return redirect(
+            url_for("dashboard")
+        )
+
+    return render_template(
+        "login.html"
+    )
 
 
 @app.route("/cadastro", methods=["GET", "POST"])
@@ -267,38 +300,61 @@ def cadastro():
 
     if request.method == "POST":
 
-        nome = request.form.get("nome", "").strip()
-        usuario = request.form.get("usuario", "").strip()
-        senha = request.form.get("senha", "")
-        confirmar = request.form.get("confirmar_senha", "")
+        nome = request.form.get(
+            "nome",
+            ""
+        ).strip()
 
-        if not nome or not usuario or not senha:
+        usuario = request.form.get(
+            "usuario",
+            ""
+        ).strip()
+
+        senha = request.form.get(
+            "senha",
+            ""
+        )
+
+        confirmar = request.form.get(
+            "confirmar_senha",
+            ""
+        )
+
+        if not nome or not usuario or not senha or not confirmar:
+
             return render_template(
                 "cadastro.html",
                 erro="Preencha todos os campos."
             )
 
         if len(senha) < 4:
+
             return render_template(
                 "cadastro.html",
                 erro="A senha deve possuir pelo menos 4 caracteres."
             )
 
         if senha != confirmar:
+
             return render_template(
                 "cadastro.html",
                 erro="As senhas não coincidem."
             )
 
-        existente = obter_usuario_por_login(usuario)
+        existente = obter_usuario_por_login(
+            usuario
+        )
 
         if existente:
+
             return render_template(
                 "cadastro.html",
                 erro="Esse nome de usuário já está cadastrado."
             )
 
-        senha_hash = generate_password_hash(senha)
+        senha_hash = generate_password_hash(
+            senha
+        )
 
         conn = conectar_banco()
 
@@ -342,14 +398,23 @@ def cadastro():
             url_for("spotify_login")
         )
 
-    return render_template("cadastro.html")
+    return render_template(
+        "cadastro.html"
+    )
 
 
 @app.route("/login", methods=["POST"])
 def login():
 
-    usuario = request.form.get("usuario", "").strip()
-    senha = request.form.get("senha", "")
+    usuario = request.form.get(
+        "usuario",
+        ""
+    ).strip()
+
+    senha = request.form.get(
+        "senha",
+        ""
+    )
 
     if not usuario or not senha:
 
@@ -358,7 +423,9 @@ def login():
             erro="Informe usuário e senha."
         )
 
-    usuario_db = obter_usuario_por_login(usuario)
+    usuario_db = obter_usuario_por_login(
+        usuario
+    )
 
     if not usuario_db:
 
@@ -376,7 +443,10 @@ def login():
             erro="Essa conta precisa ser cadastrada novamente."
         )
 
-    if not check_password_hash(senha_hash, senha):
+    if not check_password_hash(
+        senha_hash,
+        senha
+    ):
 
         return render_template(
             "login.html",
@@ -386,10 +456,11 @@ def login():
     session.clear()
 
     session["usuario_id"] = usuario_db["id"]
-    session["nome_sintonia"] = usuario_db["nome"]
 
-    # Se já existe Spotify vinculado, ainda pedimos
-    # autorização novamente para garantir um token válido.
+    session["nome_sintonia"] = (
+        usuario_db["nome"]
+    )
+
     return redirect(
         url_for("spotify_login")
     )
@@ -436,7 +507,9 @@ def spotify_login():
 @app.route("/callback")
 def callback():
 
-    codigo = request.args.get("code")
+    codigo = request.args.get(
+        "code"
+    )
 
     if not codigo:
 
@@ -447,7 +520,9 @@ def callback():
 
         return render_template(
             "erro.html",
-            mensagem=f"Não foi possível conectar ao Spotify: {erro}"
+            mensagem=(
+                f"Não foi possível conectar ao Spotify: {erro}"
+            )
         )
 
     if not session.get("usuario_id"):
@@ -473,7 +548,9 @@ def callback():
 
         perfil = spotify.current_user()
 
-        spotify_id = perfil.get("id")
+        spotify_id = perfil.get(
+            "id"
+        )
 
         if spotify_id:
 
@@ -550,7 +627,9 @@ def normalizar_texto(texto):
     texto = "".join(
         caractere
         for caractere in texto
-        if not unicodedata.combining(caractere)
+        if not unicodedata.combining(
+            caractere
+        )
     )
 
     return texto.lower().strip()
@@ -567,9 +646,11 @@ def obter_clima(cidade):
     }
 
     if not WEATHER_API_KEY:
+
         return clima_padrao
 
     if not cidade:
+
         return clima_padrao
 
     try:
@@ -586,6 +667,7 @@ def obter_clima(cidade):
         )
 
         if resposta.status_code != 200:
+
             return clima_padrao
 
         dados = resposta.json()
@@ -625,22 +707,34 @@ def obter_clima(cidade):
 
     except Exception as e:
 
-        print("Erro ao consultar clima:", e)
+        print(
+            "Erro ao consultar clima:",
+            e
+        )
 
         return clima_padrao
 
 
-def classificar_clima(descricao, temperatura):
+def classificar_clima(
+    descricao,
+    temperatura
+):
 
     texto = normalizar_texto(
         descricao
     )
 
     try:
+
         temperatura = float(
             temperatura
         )
-    except (TypeError, ValueError):
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
         temperatura = 20
 
     if any(
@@ -651,6 +745,7 @@ def classificar_clima(descricao, temperatura):
             "tempestade"
         ]
     ):
+
         return "chuvoso"
 
     if any(
@@ -660,6 +755,7 @@ def classificar_clima(descricao, temperatura):
             "nevasca"
         ]
     ):
+
         return "frio"
 
     if any(
@@ -669,12 +765,15 @@ def classificar_clima(descricao, temperatura):
             "nuvem"
         ]
     ):
+
         return "nublado"
 
     if temperatura >= 28:
+
         return "quente"
 
     if temperatura <= 15:
+
         return "frio"
 
     return "agradavel"
@@ -684,7 +783,10 @@ def classificar_clima(descricao, temperatura):
 # ARTISTAS
 # ============================================================
 
-def similaridade(a, b):
+def similaridade(
+    a,
+    b
+):
 
     a = normalizar_texto(a)
     b = normalizar_texto(b)
@@ -696,18 +798,18 @@ def similaridade(a, b):
     ).ratio()
 
 
-def encontrar_artista(spotify, nome_digitado):
+def encontrar_artista(
+    spotify,
+    nome_digitado
+):
 
     nome_digitado = nome_digitado.strip()
 
     if not nome_digitado:
+
         return None
 
     candidatos = []
-
-    # --------------------------------------------------------
-    # Busca exata por artista
-    # --------------------------------------------------------
 
     consultas = [
         f'artist:"{nome_digitado}"',
@@ -744,14 +846,16 @@ def encontrar_artista(spotify, nome_digitado):
                 e
             )
 
-    # Remove duplicados
     unicos = {}
 
     for artista in candidatos:
 
-        artista_id = artista.get("id")
+        artista_id = artista.get(
+            "id"
+        )
 
         if artista_id:
+
             unicos[artista_id] = artista
 
     candidatos = list(
@@ -759,15 +863,12 @@ def encontrar_artista(spotify, nome_digitado):
     )
 
     if not candidatos:
+
         return None
 
     nome_normalizado = normalizar_texto(
         nome_digitado
     )
-
-    # --------------------------------------------------------
-    # 1. Correspondência exata
-    # --------------------------------------------------------
 
     for artista in candidatos:
 
@@ -776,12 +877,11 @@ def encontrar_artista(spotify, nome_digitado):
             ""
         )
 
-        if normalizar_texto(nome) == nome_normalizado:
-            return artista
+        if normalizar_texto(
+            nome
+        ) == nome_normalizado:
 
-    # --------------------------------------------------------
-    # 2. Correspondência por similaridade
-    # --------------------------------------------------------
+            return artista
 
     melhor = None
     melhor_nota = 0
@@ -803,7 +903,6 @@ def encontrar_artista(spotify, nome_digitado):
             melhor_nota = nota
             melhor = artista
 
-    # Limite para evitar escolher artista completamente diferente
     if melhor and melhor_nota >= 0.60:
 
         return melhor
@@ -826,14 +925,19 @@ def buscar_musicas_do_artista(
     )
 
     if not artista_id:
+
         return []
 
     musicas = []
     ids_adicionados = set()
 
-    # Spotify atualmente permite no máximo 10 resultados
-    # por busca, então fazemos paginação.
-    offsets = [0, 10, 20, 30, 40]
+    offsets = [
+        0,
+        10,
+        20,
+        30,
+        40
+    ]
 
     for offset in offsets:
 
@@ -864,6 +968,7 @@ def buscar_musicas_do_artista(
         )
 
         if not tracks:
+
             break
 
         for faixa in tracks:
@@ -873,9 +978,11 @@ def buscar_musicas_do_artista(
             )
 
             if not faixa_id:
+
                 continue
 
             if faixa_id in ids_adicionados:
+
                 continue
 
             artistas_faixa = faixa.get(
@@ -889,6 +996,7 @@ def buscar_musicas_do_artista(
             )
 
             if not pertence:
+
                 continue
 
             musicas.append(
@@ -900,6 +1008,7 @@ def buscar_musicas_do_artista(
             )
 
         if len(musicas) >= 30:
+
             break
 
     return musicas
@@ -1044,9 +1153,11 @@ def buscar_musicas_por_humor(
             )
 
             if not faixa_id:
+
                 continue
 
             if faixa_id in ids_adicionados:
+
                 continue
 
             musicas.append(
@@ -1058,6 +1169,7 @@ def buscar_musicas_por_humor(
             )
 
             if len(musicas) >= 30:
+
                 return musicas
 
     return musicas
@@ -1075,6 +1187,7 @@ def criar_playlist_spotify(
 ):
 
     if not uris:
+
         raise ValueError(
             "Nenhuma música foi encontrada."
         )
@@ -1084,6 +1197,7 @@ def criar_playlist_spotify(
     )
 
     if not token_info:
+
         raise ValueError(
             "Token do Spotify não encontrado."
         )
@@ -1093,18 +1207,17 @@ def criar_playlist_spotify(
     )
 
     if not access_token:
+
         raise ValueError(
             "Token de acesso do Spotify inválido."
         )
 
     headers = {
-        "Authorization": f"Bearer {access_token}",
+        "Authorization": (
+            f"Bearer {access_token}"
+        ),
         "Content-Type": "application/json"
     }
-
-    # --------------------------------------------------------
-    # A API atual usa POST /me/playlists
-    # --------------------------------------------------------
 
     resposta = requests.post(
         "https://api.spotify.com/v1/me/playlists",
@@ -1117,7 +1230,10 @@ def criar_playlist_spotify(
         timeout=15
     )
 
-    if resposta.status_code not in [200, 201]:
+    if resposta.status_code not in [
+        200,
+        201
+    ]:
 
         print(
             "Erro ao criar playlist:",
@@ -1136,13 +1252,10 @@ def criar_playlist_spotify(
     )
 
     if not playlist_id:
+
         raise RuntimeError(
             "O Spotify não retornou o ID da playlist."
         )
-
-    # --------------------------------------------------------
-    # A API atual usa /items
-    # --------------------------------------------------------
 
     for inicio in range(
         0,
@@ -1163,7 +1276,10 @@ def criar_playlist_spotify(
             timeout=15
         )
 
-        if resposta_itens.status_code not in [200, 201]:
+        if resposta_itens.status_code not in [
+            200,
+            201
+        ]:
 
             print(
                 "Erro ao adicionar músicas:",
@@ -1182,7 +1298,10 @@ def criar_playlist_spotify(
 # GERAR PLAYLIST
 # ============================================================
 
-@app.route("/gerar", methods=["POST"])
+@app.route(
+    "/gerar",
+    methods=["POST"]
+)
 def gerar():
 
     if not session.get("usuario_id"):
@@ -1228,10 +1347,6 @@ def gerar():
             mensagem="Selecione um humor."
         )
 
-    # --------------------------------------------------------
-    # CLIMA
-    # --------------------------------------------------------
-
     clima = obter_clima(
         cidade
     )
@@ -1245,10 +1360,6 @@ def gerar():
                 "ou consultar o clima."
             )
         )
-
-    # --------------------------------------------------------
-    # BUSCA DE MÚSICAS
-    # --------------------------------------------------------
 
     artista = None
 
@@ -1306,10 +1417,6 @@ def gerar():
 
         nome_artista = ""
 
-    # --------------------------------------------------------
-    # LIMITA A PLAYLIST
-    # --------------------------------------------------------
-
     musicas = musicas[:30]
 
     tracks_uris = []
@@ -1321,7 +1428,10 @@ def gerar():
         )
 
         if uri and uri not in tracks_uris:
-            tracks_uris.append(uri)
+
+            tracks_uris.append(
+                uri
+            )
 
     if not tracks_uris:
 
@@ -1329,10 +1439,6 @@ def gerar():
             "erro.html",
             mensagem="Nenhuma música válida foi encontrada."
         )
-
-    # --------------------------------------------------------
-    # NOME DA PLAYLIST
-    # --------------------------------------------------------
 
     nome_playlist = (
         f"Sintonia - {humor.capitalize()}"
@@ -1356,10 +1462,6 @@ def gerar():
             f"{humor} e no clima de {clima['cidade']}."
         )
 
-    # --------------------------------------------------------
-    # CRIA PLAYLIST
-    # --------------------------------------------------------
-
     try:
 
         playlist = criar_playlist_spotify(
@@ -1372,7 +1474,9 @@ def gerar():
     except Exception as e:
 
         print()
-        print("ERRO AO CRIAR PLAYLIST:")
+        print(
+            "ERRO AO CRIAR PLAYLIST:"
+        )
         print(e)
         print()
 
@@ -1383,10 +1487,6 @@ def gerar():
                 "no Spotify."
             )
         )
-
-    # --------------------------------------------------------
-    # INFORMAÇÕES DAS MÚSICAS
-    # --------------------------------------------------------
 
     musicas_resultado = []
 
@@ -1414,29 +1514,46 @@ def gerar():
             )
         })
 
-    # --------------------------------------------------------
-    # DEBUG NO TERMINAL
-    # --------------------------------------------------------
-
     print()
     print("=" * 60)
     print("PLAYLIST GERADA")
     print("=" * 60)
-    print("Nome:", nome_playlist)
-    print("Cidade:", clima["cidade"])
-    print("Temperatura:", clima["temp"])
-    print("Clima:", clima["desc"])
-    print("Humor:", humor)
+    print(
+        "Nome:",
+        nome_playlist
+    )
+    print(
+        "Cidade:",
+        clima["cidade"]
+    )
+    print(
+        "Temperatura:",
+        clima["temp"]
+    )
+    print(
+        "Clima:",
+        clima["desc"]
+    )
+    print(
+        "Humor:",
+        humor
+    )
 
     if nome_artista:
-        print("Artista:", nome_artista)
+
+        print(
+            "Artista:",
+            nome_artista
+        )
 
     print()
     print("Músicas:")
 
     for faixa in musicas_resultado:
+
         print(
-            f"- {faixa['nome']} — {faixa['artista']}"
+            f"- {faixa['nome']} — "
+            f"{faixa['artista']}"
         )
 
     print("=" * 60)
@@ -1456,10 +1573,14 @@ def gerar():
 # ÁREA ROOT / MASTER
 # ============================================================
 
-@app.route("/root", methods=["GET", "POST"])
+@app.route(
+    "/root",
+    methods=["GET", "POST"]
+)
 def root_login():
 
     if session.get("root_logado"):
+
         return redirect(
             url_for("root_painel")
         )
@@ -1647,9 +1768,15 @@ if __name__ == "__main__":
     print("=" * 60)
     print("SINTONIA")
     print("=" * 60)
-    print("Servidor: http://127.0.0.1:8888")
-    print("Root:     http://127.0.0.1:8888/root")
-    print("Callback: http://127.0.0.1:8888/callback")
+    print(
+        "Servidor: http://127.0.0.1:8888"
+    )
+    print(
+        "Root:     http://127.0.0.1:8888/root"
+    )
+    print(
+        "Callback: http://127.0.0.1:8888/callback"
+    )
     print("=" * 60)
     print()
 
