@@ -12,7 +12,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "database.db")
 
-
 # ============================================================
 # CONEXÃO COM O BANCO
 # ============================================================
