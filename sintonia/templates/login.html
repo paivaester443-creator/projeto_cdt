@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}
+Entrar | Sintonia
+{% endblock %}
+
+
+{% block content %}
+
+<section class="auth-card">
+
+    <div class="brand">
+        Sintonia
+    </div>
+
+    <p class="subtitle">
+        Sua música acompanha o seu momento.
+    </p>
+
+
+    <form
+        method="POST"
+        class="form"
+    >
+
+        <label for="usuario">
+            Usuário
+        </label>
+
+        <input
+            id="usuario"
+            name="usuario"
+            type="text"
+            autocomplete="username"
+            required
+        >
+
+
+        <label for="senha">
+            Senha
+        </label>
+
+        <input
+            id="senha"
+            name="senha"
+            type="password"
+            autocomplete="current-password"
+            required
+        >
+
+
+        <button
+            class="primary-button"
+            type="submit"
+        >
+            Entrar
+        </button>
+
+    </form>
+
+
+    <p class="switch-link">
+
+        Ainda não possui uma conta?
+
+        <a href="{{ url_for('cadastro') }}">
+            Criar usuário
+        </a>
+
+    </p>
+
+</section>
+
+{% endblock %}

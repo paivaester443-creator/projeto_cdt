@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}
+Painel Master | Sintonia
+{% endblock %}
+
+
+{% block content %}
+
+<header class="topbar">
+
+    <div>
+
+        <div class="brand small">
+            Sintonia
+        </div>
+
+        <span class="muted">
+            Painel Master
+        </span>
+
+    </div>
+
+
+    <a
+        class="text-button"
+        href="{{ url_for('root_logout') }}"
+    >
+        Sair
+    </a>
+
+</header>
+
+
+<section class="admin-card">
+
+    <div>
+
+        <p class="eyebrow">
+            ADMINISTRAÇÃO
+        </p>
+
+
+        <h1>
+            Dados do sistema
+        </h1>
+
+
+        <p class="muted">
+            Usuários cadastrados no banco de dados.
+        </p>
+
+    </div>
+
+
+    <a
+        class="primary-button link-button"
+        href="{{ url_for('root_exportar') }}"
+    >
+        Exportar banco em JSON
+    </a>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        ID
+                    </th>
+
+                    <th>
+                        Usuário
+                    </th>
+
+                    <th>
+                        Tipo
+                    </th>
+
+                    <th>
+                        Criado em
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for usuario in usuarios %}
+
+                <tr>
+
+                    <td>
+                        {{ usuario.id }}
+                    </td>
+
+                    <td>
+                        {{ usuario.usuario }}
+                    </td>
+
+                    <td>
+                        {{ usuario.tipo }}
+                    </td>
+
+                    <td>
+                        {{ usuario.criado_em }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+{% endblock %}

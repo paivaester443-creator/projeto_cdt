@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}
+Sintonia
+{% endblock %}
+
+
+{% block content %}
+
+<header class="topbar">
+
+    <div>
+
+        <div class="brand small">
+            Sintonia
+        </div>
+
+        <span class="muted">
+            Olá, {{ username }}.
+        </span>
+
+    </div>
+
+
+    <a
+        class="text-button"
+        href="{{ url_for('logout') }}"
+    >
+        Sair
+    </a>
+
+</header>
+
+
+<section class="dashboard-card">
+
+    <div class="dashboard-heading">
+
+        <p class="eyebrow">
+            CRIADOR DE PLAYLISTS
+        </p>
+
+        <h1>
+            Crie uma playlist para o seu momento.
+        </h1>
+
+        <p class="muted">
+            O Sintonia combina humor, clima,
+            localização e artista para encontrar
+            músicas no Spotify.
+        </p>
+
+    </div>
+
+
+    <form
+        method="POST"
+        action="{{ url_for('gerar') }}"
+        class="playlist-form"
+        id="playlistForm"
+    >
+
+
+        <div class="field-group">
+
+            <label for="humor">
+                Humor
+            </label>
+
+            <select
+                id="humor"
+                name="humor"
+            >
+
+                <option value="Feliz">
+                    Feliz
+                </option>
+
+                <option value="Romântico">
+                    Romântico
+                </option>
+
+                <option value="Calmo">
+                    Calmo
+                </option>
+
+                <option value="Triste">
+                    Triste
+                </option>
+
+                <option value="Energético">
+                    Energético
+                </option>
+
+                <option value="Nostálgico">
+                    Nostálgico
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="field-group">
+
+            <label for="artista">
+                Artista favorito
+            </label>
+
+            <input
+                id="artista"
+                name="artista"
+                type="text"
+                placeholder="Opcional"
+                maxlength="80"
+            >
+
+        </div>
+
+
+        <div class="field-group">
+
+            <label for="cidade">
+                Cidade
+            </label>
+
+
+            <div class="location-row">
+
+                <input
+                    id="cidade"
+                    name="cidade"
+                    type="text"
+                    placeholder="Detectando sua localização..."
+                    maxlength="100"
+                >
+
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    id="locationButton"
+                >
+                    Usar minha localização
+                </button>
+
+            </div>
+
+
+            <p
+                class="field-help"
+                id="locationStatus"
+            >
+                Tentaremos detectar sua localização.
+                Você também pode escolher outra cidade.
+            </p>
+
+        </div>
+
+
+        <input
+            type="hidden"
+            id="latitude"
+            name="latitude"
+        >
+
+        <input
+            type="hidden"
+            id="longitude"
+            name="longitude"
+        >
+
+
+        <button
+            class="primary-button large"
+            type="submit"
+        >
+            Criar playlist
+        </button>
+
+    </form>
+
+</section>
+
+{% endblock %}

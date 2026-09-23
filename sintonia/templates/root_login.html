@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}
+Master | Sintonia
+{% endblock %}
+
+
+{% block content %}
+
+<section class="auth-card">
+
+    <div class="brand">
+        Sintonia
+    </div>
+
+
+    <p class="subtitle">
+        Acesso administrativo.
+    </p>
+
+
+    <form
+        method="POST"
+        class="form"
+    >
+
+        <label for="usuario">
+            Usuário
+        </label>
+
+        <input
+            id="usuario"
+            name="usuario"
+            type="text"
+            required
+        >
+
+
+        <label for="senha">
+            Senha
+        </label>
+
+        <input
+            id="senha"
+            name="senha"
+            type="password"
+            required
+        >
+
+
+        <button
+            class="primary-button"
+            type="submit"
+        >
+            Entrar
+        </button>
+
+    </form>
+
+
+    <p class="switch-link">
+
+        <a href="{{ url_for('login') }}">
+            Voltar para o Sintonia
+        </a>
+
+    </p>
+
+</section>
+
+{% endblock %}

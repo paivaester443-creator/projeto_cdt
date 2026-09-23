@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+Erro | Sintonia
+{% endblock %}
+
+
+{% block content %}
+
+<section class="result-card">
+
+    <p class="eyebrow">
+        ATENÇÃO
+    </p>
+
+
+    <h1>
+        {{ titulo }}
+    </h1>
+
+
+    <p class="muted">
+        {{ mensagem }}
+    </p>
+
+
+    <a
+        class="primary-button link-button"
+        href="{{ url_for('dashboard') }}"
+    >
+        Voltar
+    </a>
+
+</section>
+
+{% endblock %}

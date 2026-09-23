@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}
+Playlist criada | Sintonia
+{% endblock %}
+
+
+{% block content %}
+
+<section class="result-card">
+
+    <p class="eyebrow">
+        PLAYLIST CRIADA
+    </p>
+
+
+    <h1>
+        {{ playlist.name }}
+    </h1>
+
+
+    <p class="muted">
+
+        Local:
+        {{ cidade }}
+
+        {% if clima.temp is not none %}
+
+            · {{ "%.1f"|format(clima.temp) }}°C
+
+        {% endif %}
+
+        · {{ clima.tag }}
+
+    </p>
+
+
+    <p class="result-description">
+
+        {{ clima.desc|capitalize }}.
+
+        Foram adicionadas
+        {{ quantidade }}
+        músicas.
+
+    </p>
+
+
+    <div class="result-actions">
+
+        <a
+            class="primary-button"
+            href="{{ playlist.external_urls.spotify }}"
+            target="_blank"
+            rel="noopener"
+        >
+            Abrir no Spotify
+        </a>
+
+
+        <a
+            class="secondary-button link-button"
+            href="{{ url_for('dashboard') }}"
+        >
+            Criar outra
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}

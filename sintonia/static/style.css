@@ -1,0 +1,718 @@
+:root {
+
+    --bg: #f7d9e8;
+    --surface: #fff5fa;
+    --surface-2: #f0c2d8;
+
+    --text: #351522;
+    --muted: #765766;
+
+    --border: #d9a9bd;
+
+    --accent: #9f315d;
+    --accent-hover: #812447;
+
+    --input: #fffaff;
+
+    --shadow:
+        0 18px 50px rgba(90, 22, 52, 0.12);
+}
+
+
+html.dark {
+
+    --bg: #230e19;
+    --surface: #32121f;
+    --surface-2: #45182b;
+
+    --text: #f9e9f0;
+    --muted: #d2a9ba;
+
+    --border: #633047;
+
+    --accent: #b94b76;
+    --accent-hover: #d0608d;
+
+    --input: #28101a;
+
+    --shadow:
+        0 18px 50px rgba(0, 0, 0, 0.30);
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+html {
+    min-height: 100%;
+}
+
+
+body {
+
+    margin: 0;
+
+    min-height: 100vh;
+
+    background: var(--bg);
+
+    color: var(--text);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+
+a {
+
+    color: var(--accent);
+
+    text-decoration: none;
+}
+
+
+a:hover {
+
+    text-decoration: underline;
+}
+
+
+button,
+input,
+select {
+
+    font: inherit;
+}
+
+
+/* =====================================================
+   PÁGINA
+===================================================== */
+
+.page {
+
+    width:
+        min(
+            1100px,
+            calc(100% - 32px)
+        );
+
+    margin: 0 auto;
+
+    padding:
+        72px 0 48px;
+}
+
+
+/* =====================================================
+   BOTÃO DE TEMA
+===================================================== */
+
+.theme-toggle {
+
+    position: fixed;
+
+    top: 18px;
+    right: 18px;
+
+    z-index: 100;
+
+    width: auto;
+
+    min-width: 110px;
+
+    height: 38px;
+
+    padding:
+        0 14px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 999px;
+
+    background: var(--surface);
+
+    color: var(--text);
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.08);
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.theme-toggle:hover {
+
+    border-color:
+        var(--accent);
+}
+
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+.auth-card,
+.dashboard-card,
+.result-card,
+.admin-card {
+
+    background:
+        var(--surface);
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 22px;
+
+    box-shadow:
+        var(--shadow);
+}
+
+
+.auth-card {
+
+    width:
+        min(440px, 100%);
+
+    margin:
+        8vh auto 0;
+
+    padding: 38px;
+}
+
+
+/* =====================================================
+   MARCA
+===================================================== */
+
+.brand {
+
+    font-size: 34px;
+
+    font-weight: 800;
+
+    letter-spacing: -1px;
+}
+
+
+.brand.small {
+
+    font-size: 25px;
+}
+
+
+.subtitle,
+.muted {
+
+    color: var(--muted);
+}
+
+
+.subtitle {
+
+    margin:
+        8px 0 30px;
+}
+
+
+/* =====================================================
+   FORMULÁRIOS
+===================================================== */
+
+.form,
+.playlist-form {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+.form label,
+.field-group label {
+
+    margin-top: 8px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+
+input,
+select {
+
+    width: 100%;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 11px;
+
+    background:
+        var(--input);
+
+    color:
+        var(--text);
+
+    padding:
+        13px 14px;
+
+    outline: none;
+}
+
+
+input:focus,
+select:focus {
+
+    border-color:
+        var(--accent);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(185, 75, 118, 0.15);
+}
+
+
+/* =====================================================
+   BOTÕES
+===================================================== */
+
+.primary-button,
+.secondary-button,
+.text-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 11px;
+
+    padding:
+        12px 17px;
+
+    border:
+        1px solid transparent;
+
+    cursor: pointer;
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.primary-button {
+
+    margin-top: 14px;
+
+    background:
+        var(--accent);
+
+    color: white;
+}
+
+
+.primary-button:hover {
+
+    background:
+        var(--accent-hover);
+
+    text-decoration: none;
+}
+
+
+.primary-button.large {
+
+    width: 100%;
+
+    padding: 14px;
+
+    margin-top: 22px;
+}
+
+
+.secondary-button {
+
+    background:
+        var(--surface-2);
+
+    color:
+        var(--text);
+
+    border-color:
+        var(--border);
+}
+
+
+.secondary-button:hover {
+
+    border-color:
+        var(--accent);
+
+    text-decoration: none;
+}
+
+
+.link-button {
+
+    width: fit-content;
+}
+
+
+.text-button {
+
+    color:
+        var(--text);
+
+    padding:
+        8px 12px;
+}
+
+
+/* =====================================================
+   LINKS
+===================================================== */
+
+.switch-link {
+
+    margin-top: 22px;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   MENSAGENS
+===================================================== */
+
+.flash-area {
+
+    width:
+        min(600px, 100%);
+
+    margin:
+        0 auto 18px;
+}
+
+
+.flash {
+
+    padding:
+        12px 14px;
+
+    border-radius: 10px;
+
+    margin-bottom: 8px;
+
+    border:
+        1px solid var(--border);
+
+    background:
+        var(--surface);
+}
+
+
+.flash.erro {
+
+    border-color:
+        #b64a61;
+}
+
+
+.flash.sucesso {
+
+    border-color:
+        #4d9b72;
+}
+
+
+/* =====================================================
+   TOPO
+===================================================== */
+
+.topbar {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 24px;
+}
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard-card,
+.result-card,
+.admin-card {
+
+    padding: 42px;
+}
+
+
+.eyebrow {
+
+    margin:
+        0 0 8px;
+
+    color:
+        var(--accent);
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+
+h1 {
+
+    margin: 0;
+
+    max-width: 780px;
+
+    font-size:
+        clamp(30px, 5vw, 50px);
+
+    line-height: 1.05;
+
+    letter-spacing: -1.5px;
+}
+
+
+.dashboard-heading {
+
+    margin-bottom: 34px;
+}
+
+
+.playlist-form {
+
+    gap: 18px;
+}
+
+
+.field-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+/* =====================================================
+   LOCALIZAÇÃO
+===================================================== */
+
+.location-row {
+
+    display: flex;
+
+    gap: 10px;
+}
+
+
+.location-row input {
+
+    flex: 1;
+}
+
+
+.location-row .secondary-button {
+
+    white-space: nowrap;
+}
+
+
+.field-help {
+
+    margin: 0;
+
+    font-size: 12px;
+
+    color:
+        var(--muted);
+}
+
+
+/* =====================================================
+   RESULTADO
+===================================================== */
+
+.result-card {
+
+    max-width: 760px;
+
+    margin:
+        8vh auto 0;
+}
+
+
+.result-description {
+
+    color:
+        var(--muted);
+
+    margin-top: 20px;
+
+    line-height: 1.6;
+}
+
+
+.result-actions {
+
+    display: flex;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+    margin-top: 28px;
+}
+
+
+/* =====================================================
+   ADMIN
+===================================================== */
+
+.admin-card {
+
+    overflow: hidden;
+}
+
+
+.table-wrap {
+
+    overflow-x: auto;
+
+    margin-top: 30px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 12px;
+}
+
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+
+th,
+td {
+
+    padding:
+        13px 15px;
+
+    text-align: left;
+
+    border-bottom:
+        1px solid var(--border);
+
+    white-space: nowrap;
+}
+
+
+th {
+
+    background:
+        var(--surface-2);
+}
+
+
+tr:last-child td {
+
+    border-bottom: 0;
+}
+
+
+/* =====================================================
+   CELULAR
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .page {
+
+        width:
+            min(
+                100% - 20px,
+                1100px
+            );
+
+        padding-top: 68px;
+    }
+
+
+    .auth-card,
+    .dashboard-card,
+    .result-card,
+    .admin-card {
+
+        padding: 25px;
+
+        border-radius: 17px;
+    }
+
+
+    .location-row {
+
+        flex-direction: column;
+    }
+
+
+    .location-row
+    .secondary-button {
+
+        width: 100%;
+    }
+
+
+    .theme-toggle {
+
+        top: 12px;
+
+        right: 12px;
+
+        min-width: 105px;
+    }
+
+
+    h1 {
+
+        font-size: 34px;
+    }
+}

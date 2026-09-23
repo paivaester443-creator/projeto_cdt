@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}
+Cadastro | Sintonia
+{% endblock %}
+
+
+{% block content %}
+
+<section class="auth-card">
+
+    <div class="brand">
+        Criar usuário
+    </div>
+
+    <p class="subtitle">
+        Cadastre sua conta para usar o Sintonia.
+    </p>
+
+
+    <form
+        method="POST"
+        class="form"
+    >
+
+        <label for="usuario">
+            Usuário
+        </label>
+
+        <input
+            id="usuario"
+            name="usuario"
+            type="text"
+            autocomplete="username"
+            required
+        >
+
+
+        <label for="senha">
+            Senha
+        </label>
+
+        <input
+            id="senha"
+            name="senha"
+            type="password"
+            autocomplete="new-password"
+            required
+        >
+
+
+        <label for="confirmar">
+            Confirmar senha
+        </label>
+
+        <input
+            id="confirmar"
+            name="confirmar"
+            type="password"
+            autocomplete="new-password"
+            required
+        >
+
+
+        <button
+            class="primary-button"
+            type="submit"
+        >
+            Cadastrar
+        </button>
+
+    </form>
+
+
+    <p class="switch-link">
+
+        Já possui uma conta?
+
+        <a href="{{ url_for('login') }}">
+            Voltar para o login
+        </a>
+
+    </p>
+
+</section>
+
+{% endblock %}
