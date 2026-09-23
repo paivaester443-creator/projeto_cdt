@@ -403,68 +403,43 @@ def cadastro():
     )
 
 
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
 
-    usuario = request.form.get(
-        "usuario",
-        ""
-    ).strip()
+    if request.method == "GET":
+        return render_template("login.html")
 
-    senha = request.form.get(
-        "senha",
-        ""
-    )
+    usuario = request.form.get("usuario", "").strip()
+    senha = request.form.get("senha", "")
 
     if not usuario or not senha:
-
         return render_template(
             "login.html",
-            erro="Informe usuário e senha."
+            erro="Preencha usuário e senha."
         )
 
-    usuario_db = obter_usuario_por_login(
-        usuario
-    )
+    usuario_db = obter_usuario_por_login(usuario)
 
     if not usuario_db:
-
         return render_template(
             "login.html",
             erro="Usuário ou senha incorretos."
         )
 
-    senha_hash = usuario_db["senha"]
-
-    if not senha_hash:
-
-        return render_template(
-            "login.html",
-            erro="Essa conta precisa ser cadastrada novamente."
-        )
-
-    if not check_password_hash(
-        senha_hash,
-        senha
-    ):
-
+    if not check_password_hash(usuario_db["senha"], senha):
         return render_template(
             "login.html",
             erro="Usuário ou senha incorretos."
         )
-
-    session.clear()
 
     session["usuario_id"] = usuario_db["id"]
+    session["usuario"] = usuario_db["usuario"]
+    session["nome_sintonia"] = usuario_db["nome"]
 
-    session["nome_sintonia"] = (
-        usuario_db["nome"]
-    )
+    if usuario_db["spotify_id"]:
+        return redirect(url_for("dashboard"))
 
-    return redirect(
-        url_for("spotify_login")
-    )
-
+    return redirect(url_for("spotify_login"))
 
 # ============================================================
 # LOGOUT DO SINTONIA
